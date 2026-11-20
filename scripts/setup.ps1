@@ -30,15 +30,15 @@ Write-Host '==> lark-agent-bridge setup'
 Write-Host "    project : $ProjectDir"
 Write-Host "    profile : $ProfileDir"
 
-# 1. Preflight: node (dsh needs ^22.19.0 || >=24.0.0)
+# 1. Preflight: current declared DSH hosts require Node >=24.9.0.
 $node = Get-Command node -ErrorAction SilentlyContinue
 if (-not $node) {
-    Write-Error 'node not found in PATH. Install Node.js ^22.19.0 or >=24.0.0 (https://nodejs.org).'
+    Write-Error 'node not found in PATH. Install Node.js >=24.9.0 (https://nodejs.org).'
     exit 1
 }
-$nodeMajor = [int]((& node -p 'Number(process.versions.node.split(".")[0])').Trim())
-if ($nodeMajor -lt 22) {
-    Write-Error "node $(& node -v) is too old - dsh needs ^22.19.0 || >=24.0.0."
+& node -e 'const [major, minor] = process.versions.node.split(".").map(Number); process.exit(major > 24 || (major === 24 && minor >= 9) ? 0 : 1)'
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "node $(& node -v) is too old - declared dsh hosts need >=24.9.0."
     exit 1
 }
 Write-Host "    node    : $(& node -v) (ok)"

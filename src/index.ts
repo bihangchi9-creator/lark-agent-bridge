@@ -63,6 +63,10 @@ export { loadCustomAdapter } from './custom-adapter.js'
  */
 export function apply(ctx: Context, config: LarkBridgeConfig = {}): void {
   const log = makeLogger(ctx)
+  if (config.enabled === false) {
+    log('info', 'disabled by config — no channel connection or registration')
+    return
+  }
   try {
     applyInner(ctx, config, log)
   } catch (err) {
@@ -74,6 +78,7 @@ export function apply(ctx: Context, config: LarkBridgeConfig = {}): void {
 function applyInner(ctx: Context, config: LarkBridgeConfig, log: LogFn): void {
   ctx.effect(() => {
     let cancelled = false
+    const registration = new AbortController()
     let bridge: LarkBridge | undefined
 
     // Connect a channel with fully-resolved credentials. Shared by the ready
@@ -109,6 +114,7 @@ function applyInner(ctx: Context, config: LarkBridgeConfig, log: LogFn): void {
           `${registerUrlPath()} in a browser.`,
       )
       void runRegister({
+        signal: registration.signal,
         log: line => log('info', line.trim()),
         onUrl: url => {
           try {
@@ -127,11 +133,14 @@ function applyInner(ctx: Context, config: LarkBridgeConfig, log: LogFn): void {
           log('info', 'registration complete — connecting to Feishu')
           connect(resolved)
         })
-        .catch(err => log('error', 'registration wizard failed', err))
+        .catch(err => {
+          if (!cancelled) log('error', 'registration wizard failed', err)
+        })
     }
 
     return async () => {
       cancelled = true
+      registration.abort()
       if (bridge) await bridge.disconnect().catch(err => log('warn', 'disconnect failed', err))
     }
   }, 'lark-bridge.connect()')

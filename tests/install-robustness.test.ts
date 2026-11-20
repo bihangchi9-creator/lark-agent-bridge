@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { dirname } from 'node:path'
 import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { apply, inject } from '../src/index'
 
 describe('install robustness — inject surface', () => {
@@ -84,6 +84,11 @@ describe('install robustness — complete workspace tier delivery', () => {
 })
 
 describe('install robustness — apply() containment', () => {
+  it('explicit disabled mode does not touch credentials, channel or effect', () => {
+    const effect = vi.fn()
+    expect(() => apply({ effect } as never, { enabled: false })).not.toThrow()
+    expect(effect).not.toHaveBeenCalled()
+  })
   it('never throws to the host, even when the context misbehaves', () => {
     // A bridge that cannot start must log and stay offline — it must NOT take
     // the dsh host down. apply() wraps its whole body.

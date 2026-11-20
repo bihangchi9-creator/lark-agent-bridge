@@ -21,6 +21,8 @@ import { readCredentials } from './credentials.js'
 export type LarkTenant = 'feishu' | 'lark'
 
 export interface LarkBridgeConfig {
+  /** Explicitly disable channel/registration side effects; default true. */
+  enabled?: boolean
   /** Feishu/Lark app id (`cli_...`). Falls back to `LARK_APP_ID`. */
   appId?: string
   /** Feishu/Lark app secret. Falls back to `LARK_APP_SECRET`. */
@@ -95,8 +97,9 @@ export interface LarkBridgeConfig {
 }
 
 export const Config: Schema<LarkBridgeConfig> = Schema.object({
+  enabled: Schema.boolean().default(true),
   appId: Schema.string(),
-  appSecret: Schema.string(),
+  appSecret: Schema.string().role('secret'),
   tenant: Schema.union(['feishu', 'lark'] as const),
   provider: Schema.string(),
   model: Schema.string(),

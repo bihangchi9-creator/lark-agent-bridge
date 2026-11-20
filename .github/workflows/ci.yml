@@ -1,0 +1,25 @@
+name: Fixed-source distribution checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.14.1'
+      - run: npm install --global pnpm@11.28.5
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm typecheck && pnpm build && pnpm test
+      - run: node scripts/verify-distribution.mjs
+      - name: Fail on stale committed build output
+        run: git diff --exit-code -- lib tools/lark-cli/lib
+      - run: npm pack --dry-run --ignore-scripts

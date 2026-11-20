@@ -32,6 +32,8 @@ import {
 
 /** Optional hooks so callers can surface progress their own way (logs, files). */
 export interface RegisterHooks {
+  /** Cancel QR polling when the owning plugin is unloaded. */
+  signal?: AbortSignal
   /** Emit a human-readable status/progress line. Defaults to `console.log`. */
   log?: (line: string) => void
   /**
@@ -55,6 +57,7 @@ export async function runRegister(hooks: RegisterHooks = {}): Promise<SavedCrede
 
   const result = await registerApp({
     source: 'lark-agent-bridge',
+    signal: hooks.signal,
     onQRCodeReady: info => {
       log('请用「飞书」手机 App 扫描下面的二维码，并在手机上确认创建应用：\n')
       qrcode.generate(info.url, { small: true })
@@ -72,6 +75,7 @@ export async function runRegister(hooks: RegisterHooks = {}): Promise<SavedCrede
     },
   })
 
+  hooks.signal?.throwIfAborted()
   const tenant: LarkTenant = result.user_info?.tenant_brand === 'lark' ? 'lark' : 'feishu'
   // The person who scanned the QR is the app owner — their open_id is the
   // bootstrap trust anchor for the access gate (see access.ts).

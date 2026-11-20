@@ -56,11 +56,31 @@ ByteDance-only overlay (SSO, bytecli, extra presets) lives in a local `internal/
 ## Requirements
 
 - A working **DeepSeek Harness (dsh)** checkout you can launch with `dsh web`.
-- **Node.js** `^22.19.0 || >=24.0.0`.
+- **Node.js** `>=24.9.0` for this release and its declared DSH 0.2.2 RC hosts.
 - A **DeepSeek API key** (set `DEEPSEEK_API_KEY`, or configure it in your dsh credentials).
 - A **Feishu account** to scan the QR code (the wizard creates the app for you).
 
 ## Install
+
+### 0.0.4 fixed-source / DSH STORE contract
+
+The canonical repository is `bihangchi9-creator/lark-agent-bridge` (the former
+`dsh-lark-bridge` URL redirects here). Git commits include both packages' runtime
+JS/declarations and MIT License; no install/prepare hook is required.
+`engines.dsh` and `dsh.compatibility` declare 0.2.2-rc.3 / rc.4 / rc.5.
+All three passed disposable Web Profile install, **disabled-channel** host
+startup, uninstall and exact composition restoration on macOS. Actual
+Feishu/LLM and Desktop acceptance remain unverified.
+See [verification evidence](docs/verification-0.0.4.md) and
+[permissions, dependencies and limitations](SECURITY.md).
+
+This is a high-permission bridge, not eligible for zero-permission automatic
+approval. DSH STORE still needs source/dependency review and migration from
+the old `dsh-lark-bridge@0.0.1` identity. This GitHub version is not an npm
+publication or a claim of Store approval. Pin the full Git Commit for installation.
+
+To inspect/load offline, set `config: { enabled: false }` on the `lark-bridge`
+row; this prevents registration and channel connection.
 
 ### Option 1: npm package (recommended for users)
 
@@ -115,11 +135,10 @@ npx -p @bihangchi9/lark-agent-bridge lark-agent-bridge
 
 ### Option 2: source checkout one-command setup (contributors)
 
-> **Build first.** Git contains TypeScript source, while compiled `lib/` is
-> git-ignored. A fresh source checkout therefore has no build output; the
-> plugin entry is `lib/index.js`, so registering it without building gives dsh
-> an empty package and **the host fails to load it**. `pnpm setup` builds for
-> you.
+> **Fixed-Commit ready.** From 0.0.4, Git includes compiled `lib/` JavaScript
+> and declarations for both the bridge and the workspace tool. Installation
+> does not need a build or `prepare` hook. After editing source, run
+> `pnpm install --frozen-lockfile && pnpm build` and commit the refreshed output.
 
 ```bash
 git clone https://github.com/bihangchi9-creator/lark-agent-bridge.git
@@ -149,12 +168,12 @@ $env:DSH_PERMISSION_MODE = "danger-full-access"; dsh web
 > therefore requires an already-initialized profile; it fails before building
 > or copying presets, so it leaves no partial installation.
 
-### Option 3: official `dsh plugin` command from source (build first!)
+### Option 3: official `dsh plugin` command from a fixed source
 
 ```bash
 git clone https://github.com/bihangchi9-creator/lark-agent-bridge.git
 cd lark-agent-bridge
-pnpm install && pnpm build          # REQUIRED — link installs pull lib/ from this dir
+pnpm install --frozen-lockfile      # install dependencies; compiled lib/ is committed
 # then, from your dsh checkout:
 dsh plugin --profile web add link:/path/to/lark-agent-bridge
 ```

@@ -56,11 +56,27 @@ CLI **spawn** 二进制；IDE **attach** 当前用户拥有且组/其他用户�
 ## 环境要求
 
 - 一个能用 `dsh web` 启动的 **DeepSeek Harness（dsh）** 代码库。
-- **Node.js** `^22.19.0 || >=24.0.0`。
+- **Node.js** `>=24.9.0`（本次声明的 DSH 0.2.2 RC 宿主要求）。
 - 一个 **DeepSeek API key**（设 `DEEPSEEK_API_KEY`，或配到 dsh 的凭证里）。
 - 一个 **飞书账号** 用来扫码（向导会替你创建应用）。
 
 ## 安装
+
+### 0.0.4 固定源码 / DSH STORE 契约
+
+canonical 仓库为 `bihangchi9-creator/lark-agent-bridge`（旧 `dsh-lark-bridge`
+链接会跳转）。Git 已包含 bridge 与 workspace tool 的运行 JS、类型声明与 MIT
+许可证，安装无需 install/prepare 钩子。`engines.dsh` 与 `dsh.compatibility`
+明确声明 0.2.2-rc.3 / rc.4 / rc.5；三个版本均在 macOS 一次性 Web Profile 中通过
+安装、**禁用飞书连接的宿主启动**、卸载和配置精确恢复。真实飞书/LLM 与 Desktop
+验收仍未验证。见[验证证据](docs/verification-0.0.4.md)与[权限、依赖和限制](SECURITY.md)。
+
+本项目确实需要高权限，不能当作“零权限自动批准”插件。商城仍须做固定源码/依赖审阅，
+并从旧 `dsh-lark-bridge@0.0.1` 身份迁移。这次 GitHub 修复不代表 npm 已发布或商城
+已批准；安装请固定完整 Git Commit。
+
+离线检查/加载时，可在 `lark-bridge` 条目设置 `config: { enabled: false }`，
+阻止注册与飞书连接。
 
 ### 方式一：npm 包（普通用户推荐）
 
@@ -108,7 +124,7 @@ npx -p @bihangchi9/lark-agent-bridge lark-agent-bridge
 
 ### 方式二：源码一键安装（贡献者）
 
-> **先构建。** Git 仓库只提供 TypeScript 源码，编译产物 `lib/` 被 git 忽略——**全新 clone 没有构建产物**。插件入口是 `lib/index.js`，不构建就注册会让 dsh 拿到一个空包、**宿主加载失败**。`pnpm setup` 会替你构建。
+> **固定 Commit 可分发。** 从 0.0.4 起，Git 同时提交 bridge 与 workspace tool 的 `lib/` JavaScript 和类型声明，安装无需构建或 `prepare` 钩子。修改源码后请运行 `pnpm install --frozen-lockfile && pnpm build`，并提交更新后的产物。
 
 ```bash
 git clone https://github.com/bihangchi9-creator/lark-agent-bridge.git
@@ -130,12 +146,12 @@ $env:DSH_PERMISSION_MODE = "danger-full-access"; dsh web
 
 > 换 profile：`DSH_PROFILE=headless pnpm setup`；自定义 dsh 目录：`DSH_HOME=/path/.dsh pnpm setup`（Windows 同样支持这两个环境变量）。如果系统里找不到 `dsh` 命令，脚本只能走手动 fallback，此时要求目标 profile 已经初始化；若不存在，脚本会在构建和复制 preset 之前退出，不留下半安装状态。
 
-### 方式三：从源码使用 dsh 官方命令（务必先构建！）
+### 方式三：从固定源码使用 dsh 官方命令
 
 ```bash
 git clone https://github.com/bihangchi9-creator/lark-agent-bridge.git
 cd lark-agent-bridge
-pnpm install && pnpm build          # 必需——link 安装会从本目录拉取 lib/
+pnpm install --frozen-lockfile      # 安装依赖；Git 已包含编译后的 lib/
 # 然后从你的 dsh 代码库目录执行：
 dsh plugin --profile web add link:/path/to/lark-agent-bridge
 ```

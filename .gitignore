@@ -1,5 +1,11 @@
 node_modules/
-lib/
+# Fixed-Commit installs must contain executable and declaration artifacts.
+lib/*
+!lib/*.js
+!lib/*.d.ts
+tools/lark-cli/lib/*
+!tools/lark-cli/lib/*.js
+!tools/lark-cli/lib/*.d.ts
 dist/
 coverage/
 

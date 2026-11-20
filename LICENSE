@@ -1,11 +1,7 @@
 MIT License
 
-Copyright (c) 2026 zarazhangrui (original work: feishu-claude-code-bridge /
-lark-coding-agent-bridge)
-Copyright (c) 2026 bihangchi (trae-to-lark: TRAE CLI support and related
-modifications)
-Copyright (c) 2026 bihangchi (dsh-lark-bridge: native DeepSeek Harness plugin
-reimplementation)
+Copyright (c) 2026 zarazhangrui
+Copyright (c) 2026 bihangchi
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
