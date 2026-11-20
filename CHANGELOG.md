@@ -28,6 +28,8 @@ Remediation for <https://github.com/AI-Scarlett/DSH-Store/issues/656>.
 - Add fixed-source distribution tests, reproducible-artifact CI, and a disposable
   lifecycle harness. Source and packed artifacts both passed all three hosts'
   install/start/uninstall/baseline-restoration checks.
+- Isolate configuration tests from real saved credentials and check the
+  credential-free path explicitly (initial clean Linux CI exposed this old gap).
 - Document elevated permissions, dependency review and the Store identity
   migration gate. Real Feishu/LLM/Desktop acceptance remains unverified;
   no real Profile was updated and no npm publication was performed.

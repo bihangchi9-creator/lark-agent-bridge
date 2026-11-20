@@ -65,13 +65,16 @@ timeout and fail-closed preset boundaries.
   boundaries in `SECURITY.md`.
 - Add distribution checks and CI that detects stale generated code.
 
-Local checks: 23 test files / 151 tests passed; root and workspace TypeScript
+Local checks: 23 test files / 152 tests passed; root and workspace TypeScript
 builds passed; distribution verifier confirmed 56 committed runtime files;
 pack inspection found the runtime, LICENSE and both entry
 pairs, with no source maps. `build-dsh-plugin` static audit returned 80/80,
 `isolated-acceptance-ready`. This static score is not a security certification;
 its documentary transaction markers do not prove the legacy setup fallback is
-transactional. GitHub CI status must be checked separately after push.
+transactional. Initial GitHub CI caught an existing configuration test that
+implicitly depended on saved operator credentials; that test now uses only
+temporary state and synthetic fixtures. GitHub CI status must be checked
+separately after push.
 
 ## Marketplace gate that source fixes cannot grant
 

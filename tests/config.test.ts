@@ -1,14 +1,24 @@
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Config, tryResolveConfig } from '../src/config'
 import { readCredentials, saveOwnerId } from '../src/credentials'
 
 const dirs: string[] = []
 const originalHome = process.env.DSH_LARK_HOME
 
+beforeEach(() => {
+  const dir = mkdtempSync(join(tmpdir(), 'lark-config-isolated-'))
+  dirs.push(dir)
+  process.env.DSH_LARK_HOME = dir
+  vi.stubEnv('LARK_APP_ID', '')
+  vi.stubEnv('LARK_APP_SECRET', '')
+  vi.stubEnv('DSH_LARK_PRESET_MODELS', '')
+})
+
 afterEach(() => {
+  vi.unstubAllEnvs()
   if (originalHome === undefined) delete process.env.DSH_LARK_HOME
   else process.env.DSH_LARK_HOME = originalHome
   for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true })
@@ -41,15 +51,18 @@ describe('credential identity binding', () => {
 })
 
 describe('presetModels resolution (DSH_LARK_PRESET_MODELS)', () => {
+  it('keeps absent credentials unresolved instead of reading the operator account', () => {
+    expect(tryResolveConfig(Config({}))).toBeUndefined()
+  })
+
   it('parses provider:model routes from env, even through the schema', () => {
-    const validated = Config({})
-    const r = tryResolveConfig({
-      ...validated,
-      // simulate the schemastery default {} + env fallback path
-    })
-    // env is not set in the test runner, so extras resolve empty — this test
-    // asserts the field exists and defaults empty.
+    const validated = Config({ appId: 'cli_fixture', appSecret: 'fixture' })
+    const r = tryResolveConfig(validated)
     expect(r?.presetModels).toEqual({})
+    vi.stubEnv('DSH_LARK_PRESET_MODELS', 'internal:fixture-provider:fixture-model')
+    expect(tryResolveConfig(validated)?.presetModels).toEqual({
+      internal: { provider: 'fixture-provider', model: 'fixture-model' },
+    })
   })
 
   it('keeps explicit config over env', () => {
